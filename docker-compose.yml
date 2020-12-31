@@ -1,0 +1,38 @@
+version: '3.3'
+services:
+  docker-mysql-angular:
+    restart: always
+    container_name: docker-mysql-angular
+    image: mysql
+    environment:
+      MYSQL_DATABASE: cinemaspring
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "6033:3306"
+
+  docker-app:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    expose:
+      - "8080"
+    ports:
+      - 8080:8080
+    environment:
+      WAIT_HOSTS: mysql:3306
+    depends_on:
+      - docker-mysql-angular
+  docker-front:
+    restart: on-failure
+    build:
+      context: ../cinemaFront
+      dockerfile: ./Dockerfile
+
+    ports:
+      - 8089:80
+    environment:
+      WAIT_HOSTS: docker-app:8086
+    depends_on:
+      - docker-app
